@@ -2,23 +2,39 @@
 require("functions.php");
 $selectedMonth = "";
 $note = "";
+$none = "";                //style= display:"";  ....tellimuse pikendamise vormi näidatakse
 
+//link  tellimuse tühistamiseks
+/*  <a href="?id=<?=$_GET["id"];?>&delete=true">kustuta</a>   */
 
+$delete = "<a href=?orderid=";                       //aadressireale orderid
+$delete .= $_GET["orderid"];                         //aadressireal olev orderid väärtus
+$delete .= "&delete=true>Tühista tellimus</a>" ;     //aadressireale delete=true
 if(!isset($_GET["orderid"])){
 	header("Location: data.php");
 	exit();
 }
 
-if(isset($_POST["choose"])){
+        //kui vajutati nuppu pikenda
+if(isset($_POST["choose"])){            
 	//var_dump ($_POST);             key=>value array, kus on kõik POST meetodiga saadetud informatsioon
-	//echo "vajutati pikenda nupule"; echo $_POST["months"]; echo $_GET["orderid"]; echo $_POST["order_id"];
 	//echo $selectedMonth;          //???   väärtust pole, kuigi vormis saab väärtuse  ???
-	$note = "";
+	
+	
 	changeOrder($_POST["months"], $_POST["order_id"], $_SESSION["userId"]);
 	header("Location: edit.php?orderid=".$_POST["order_id"]."&success=true");  
+	
     exit();
 }
 
+        //kui vajutati tühista linki
+if(isset($_GET["delete"])){                         
+	deleteOrder($_GET["orderid"], $_SESSION["userId"]);
+	$delete = "";              //pole rohkem vaja Tühista linki
+	$note = "Tellimus on tühistatud!";
+	$none = "none";        //style= display:none;  ....tellimuse pikendamise vormi ei näidata
+
+}
 if(isset($_GET["success"])){
 	$note = "Tellimus on pikendatud!";
 }
@@ -30,10 +46,11 @@ if(isset($_GET["success"])){
 <title>Pikenda tellimust</title>
 </head>
 <body>
-<a href="data.php"> tagasi </a>
-<h4>Vali mitu kuud tellimust pikendatakse</h4>
+<a href="data.php"> Tagasi tellimise lehele </a>
+<br><br>
 
-<form method="post" >
+<form method="post" style="display: <?=$none;?>;">
+<h4>Vali mitu kuud tellimust pikendatakse</h4>
 	<input type="hidden" name="order_id" value="<?=$_GET["orderid"];?>" >
 	<select name="months">
 <?php
@@ -65,14 +82,21 @@ $singleOrder = getSingleOrder($_GET["orderid"], $_SESSION["userId"]);
 	$html .= "</tr>";
 	
 		$html .= "<tr >";
-		$html .= "<td style='border: 1px solid black';>" . $singleOrder->order_id . "</td>";
-		$html .= "<td style='border: 1px solid black';>" . $singleOrder->date_from . "</td>";
-		$html .= "<td style='border: 1px solid black'; >" . $singleOrder->date_to . "</td>";  
+		if($singleOrder->order_id AND $singleOrder->date_from AND $singleOrder->date_to) {
+			$html .= "<td style='border: 1px solid black';>" . $singleOrder->order_id . "</td>";
+			$html .= "<td style='border: 1px solid black';>" . $singleOrder->date_from . "</td>";
+			$html .= "<td style='border: 1px solid black'; >" . $singleOrder->date_to . "</td>"; 
+		}else{
+			$html .= "<td style='border: 1px solid black';>" . $_GET["orderid"] . "</td>";
+			$html .= "<td style='border: 1px solid black';>TÜHISTATUD</td>";
+			$html .= "<td style='border: 1px solid black';>TÜHISTATUD</td>";
+		}
 		$html .= "</tr>";
 	
  $html .= "</table>";
  echo $html;
- echo "<br>" . $note;
+ echo "<br>" . $note . "<br>";
+ echo "<br><br>" . $delete;
  ?>
 </body>
 </html>

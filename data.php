@@ -142,6 +142,7 @@ for($i = 0; $i < 18; $i++){
 		$html .= "<th style='border: 1px solid black';>Tellimuse nr</th>";
 		$html .= "<th style='border: 1px solid black';>Algus</th>";
 		$html .= "<th style='border: 1px solid black';>Lõpp</th>";
+		$html .= "<th style='border: 1px solid black';>Pikenda <br> Tühista</th>";
 	$html .= "</tr>";
 	
 	foreach($userOrders as $o){
@@ -149,7 +150,7 @@ for($i = 0; $i < 18; $i++){
 		$html .= "<td style='border: 1px solid black';>" . $o->Order_nr . "</td>";
 		$html .= "<td style='border: 1px solid black';>" . $o->From . "</td>";
 		$html .= "<td style='border: 1px solid black'; >" . $o->To . "</td>";  
-		$html .= "<td><a href='edit.php?orderid=".$o->Order_nr."'>Pikenda</a></td>"; //klikkides aadressireale edit.php?orderid=tell.nr
+		$html .= "<td style='border: 1px solid black';><a href='edit.php?orderid=".$o->Order_nr."'>Muuda</a></td>"; //klikkides aadressireale edit.php?orderid=tell.nr
 		$html .= "</tr>";
 	}
  $html .= "</table>";

@@ -15,6 +15,7 @@ function signUp($firstname, $lastname,  $gender, $address, $city, $zip, $email, 
 	$database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
 	$mysqli->set_charset("utf8");	
+	//uue lisamine...("INSERT INTO tabelinimi (lahter1DB, lahter2DB) VALUES (?, ?)");
 	$stmt = $mysqli->prepare("INSERT INTO users_katse (Firstname, Lastname, Gender, Address, City, Zipcode, Email, Password) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
 	echo $mysqli -> error;   
 		
@@ -40,7 +41,8 @@ function login($email, $password){
 	$database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
 	$mysqli->set_charset("utf8");
-		$stmt = $mysqli->prepare("SELECT id, Firstname, Email, Password FROM users_katse WHERE Email = ?");
+	//olemasolevate küsimine...("SELECT lahter1DB, lahter2DB FROM tabelinimi WHERE lahter1DB = ?");
+	$stmt = $mysqli->prepare("SELECT id, Firstname, Email, Password FROM users_katse WHERE Email = ?");
 	
 	echo $mysqli->error;
 		
@@ -85,7 +87,8 @@ function placeOrder($orderFrom, $orderTo, $userId){
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
 	
 	//kontrollin ega samasugust tellimust samalt kasutajalt juba pole
-	$stmt = $mysqli->prepare("SELECT Date_from, Date_to, User_id FROM orders_katse WHERE Date_from = ? AND Date_to = ? AND User_id = ? ");
+	//olemasolevate küsimine...("SELECT lahter1DB, lahter2DB FROM tabelinimi WHERE lahter1DB = ?");
+	$stmt = $mysqli->prepare("SELECT Date_from, Date_to, User_id FROM orders_katse WHERE Date_from = ? AND Date_to = ? AND User_id = ? AND deleted IS NULL");
 	$stmt -> bind_param("ssi", $orderFrom, $orderTo, $userId);
 	$stmt -> bind_result($orderFromDB, $orderToDB, $userIdDB); 
 	$stmt -> execute();
@@ -117,8 +120,8 @@ function getData($user_id) {
 		
 	$database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
-		
-	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE User_id=?");
+	//olemasolevate küsimine...("SELECT lahter1DB, lahter2DB FROM tabelinimi WHERE lahter1DB = ?");	
+	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE User_id=? AND deleted IS NULL");
 	echo $mysqli->error;
 	$stmt->bind_param('i' , $user_id);
 	$stmt->bind_result($order_idDB, $fromDB, $toDB);
@@ -155,7 +158,7 @@ function getSingleOrder($edit_id, $user_id){
     $database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
 		
-	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE Order_id=? AND User_id=?");
+	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE Order_id=? AND User_id=? AND deleted IS NULL");
 
 		$stmt->bind_param("ii", $edit_id, $user_id);
 		$stmt->bind_result($order_idDB, $date_fromDB, $date_toDB);
@@ -182,9 +185,11 @@ function getSingleOrder($edit_id, $user_id){
 			// ei saanud rida andmeid kätte
 			// sellist id'd ei ole olemas
 			// see rida võib olla kustutatud
-			echo "Midagi läks valesti";
+			//echo "Midagi läks valesti";
 			//header("Location: data.php");
-			//exit();
+			$order->order_id = "";
+			$order->date_from = "";
+			$order->date_to = "";
 		}
 		
 		$stmt->close();
@@ -198,12 +203,13 @@ function getSingleOrder($edit_id, $user_id){
 function changeOrder($months, $order_id, $user_id){
 	$database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
-	$stmt = $mysqli->prepare("UPDATE orders_katse SET Date_to = DATE_ADD(Date_to, INTERVAL ? MONTH) WHERE Order_id=? AND User_id=?"); 
+	//muutmine...("UPDATE tabelinimi SET lahter1DB = MUUTUS() WHERE lahter2DB = ? AND lahter3DB = ?");
+	$stmt = $mysqli->prepare("UPDATE orders_katse SET Date_to = DATE_ADD(Date_to, INTERVAL ? MONTH) WHERE Order_id=? AND User_id=? AND deleted IS NULL"); 
 	$stmt->bind_param("sii",$months, $order_id, $user_id);
 	// kas õnnestus salvestada
 		if($stmt->execute()){
 			// õnnestus
-			echo "salvestus õnnestus!";
+			
 		}else{
 			echo "Midagi läks valesti";
 		}
@@ -211,4 +217,24 @@ function changeOrder($months, $order_id, $user_id){
 		$stmt->close();
 		$mysqli->close();
 }
+
+//KUSTUTA TELLIMUS
+function deleteOrder($order_id, $user_id){
+	$database = "if16_karin";
+	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
+	
+	$stmt = $mysqli->prepare("UPDATE orders_katse SET deleted=NOW() WHERE Order_id=? AND User_id=? AND deleted IS NULL");
+		$stmt->bind_param("ii",$order_id, $user_id);
+		
+		// kas õnnestus
+		if($stmt->execute()){
+			                  //NULL asendati kustutamise kuupäevaga NOW()
+		}else{
+			echo "Midagi läks valesti";
+		}
+		
+		$stmt->close();
+		$mysqli->close();
+		
+	}
 ?>

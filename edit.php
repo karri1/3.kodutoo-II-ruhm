@@ -49,7 +49,7 @@ if(isset($_GET["success"])){
 <a href="data.php"> Tagasi tellimise lehele </a>
 <br><br>
 
-<form method="post" style="display: <?=$none;?>;">
+<form method="post" style="display: <?=$none;?>;">  <!-- RIKUB KÕIK ÄRA action="<?php //echo htmlspecialchars($_SERVER["PHP_SELF"]);?>"  -->
 <h4>Vali mitu kuud tellimust pikendatakse</h4>
 	<input type="hidden" name="order_id" value="<?=$_GET["orderid"];?>" >
 	<select name="months">

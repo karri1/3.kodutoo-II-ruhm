@@ -116,12 +116,34 @@ function placeOrder($orderFrom, $orderTo, $userId){
 }
 
 //KÕIK KASUTAJA TELLIMUSED
-function getData($user_id) {
+function getData($user_id, $sort, $direction) {
 		
 	$database = "if16_karin";
 	$mysqli = new mysqli($GLOBALS["serverHost"], $GLOBALS["serverUsername"], $GLOBALS["serverPassword"], $database);
 	//olemasolevate küsimine...("SELECT lahter1DB, lahter2DB FROM tabelinimi WHERE lahter1DB = ?");	
-	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE User_id=? AND deleted IS NULL");
+	//$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse WHERE User_id=? AND deleted IS NULL");
+	
+	//mis sort ja järjekord
+		$allowedSortOptions = ["Order_id", "Date_from", "Date_to"];
+		//kas sort on lubatud valikute sees
+		if(!in_array($sort, $allowedSortOptions)){
+			$sort = "Order_id";                     //vaikimisi
+		}
+		//echo "Sorteerin: ".$sort." ";
+		
+		$orderBy= "ASC";
+		if($direction == "descending"){
+			$orderBy= "DESC";
+		}
+		//echo "Järjekord: ".$orderBy." ";
+	
+	//olemasolevate küsimine ja sorteerimine
+	//("SELECT lahter1DB, lahter2DB FROM tabelinimi /kui vaja: WHERE lahter1DB = ? AND deleted IS NULL/ ORDER BY lahterDB ASC/DESC");
+	
+	$stmt = $mysqli->prepare("SELECT Order_id, Date_from, Date_to FROM orders_katse 
+	                          WHERE User_id=? AND deleted IS NULL
+							  ORDER BY $sort $orderBy");      //kus $sort on kasutaja valitud lahter
+	
 	echo $mysqli->error;
 	$stmt->bind_param('i' , $user_id);
 	$stmt->bind_result($order_idDB, $fromDB, $toDB);

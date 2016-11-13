@@ -3,7 +3,7 @@
 require("functions.php");
 //muutujad
 $note = "Telli ajakiri: ";
-$direction="";
+$direction = "";
 //veateated
 $orderError = "";
 
@@ -35,7 +35,7 @@ if (date("d") > 20){
 	$fromMonth = $toMonth = date('n', strtotime("+1 Months"));
 	$fromYear = $toYear = date('Y', strtotime("+1 Months"));
 }
-
+//sorteerimine
 if(isset($_GET["sort"]) && isset($_GET["direction"])){
 	$sort = $_GET["sort"];
 	$direction = $_GET["direction"];
@@ -50,6 +50,13 @@ if(isset($_GET["direction"])){
 	}else{
 		$direction = "ascending";
 	}
+}
+
+//otsing
+if(isset($_GET["q"])){
+	$q = cleanInput($_GET["q"]);
+}else{
+	$q = "";
 }
 
 //kontrollin tellimuse perioodi
@@ -149,7 +156,7 @@ for($i = 0; $i < 18; $i++){
  <p>Sinu tellimused</p>
  <?php
  //kutsun funktsiooni,  userOrders= array(order, order), kus order on stdClass.... (Order_nr=>order_idDB, From=>from, To=>to)
- $userOrders = getData($_SESSION["userId"], $sort, $direction);
+ $userOrders = getData($_SESSION["userId"], $q, $sort, $direction);
  
  $html = "<table style='border: 1px solid black';>";
 	$html .= "<tr>";
@@ -159,12 +166,12 @@ for($i = 0; $i < 18; $i++){
 				   </a>
 				 </th>";
 		$html .= "<th style='border: 1px solid black';>
-					<a href='?sort=Date_from&direction=" . $direction . "'>
+					<a href='?q=".$q."&sort=Date_from&direction=" . $direction . "'>
 					Algus
 					</a>
 				</th>";
 		$html .= "<th style='border: 1px solid black';>
-					<a href='?sort=Date_to&direction=" . $direction . "'>
+					<a href='?q=".$q."&sort=Date_to&direction=" . $direction . "'>
 					Lõpp
 					</a>
 				</th>";
@@ -185,7 +192,11 @@ for($i = 0; $i < 18; $i++){
  
  
  ?>
-
+<p>Otsi tellimusi valitud kuu ja aasta järgi</p>
+<form>
+	<input type="month" name="q" value="<?=$q;?>">
+	<input type="submit" value="Vali">
+</form>
 
 </body>
 </html>
